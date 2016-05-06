@@ -6,7 +6,7 @@ import java.util.Date;
 /**
  * Created by Mathias on 06-05-2016.
  */
-public class WeatherInfo {
+public class WeatherInfo implements Comparable<WeatherInfo> {
     private int id;
     private String description;
     private int temp;
@@ -56,5 +56,8 @@ public class WeatherInfo {
         this.timestamp = timestamp;
     }
 
-
+    @Override
+    public int compareTo(WeatherInfo another) {
+        return timestamp.compareTo(another.getTimestamp());
+    }
 }

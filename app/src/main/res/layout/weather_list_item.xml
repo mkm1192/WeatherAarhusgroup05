@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Desc"
+        android:id="@+id/listDescTxtView"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="101dp"
+        android:layout_marginTop="30dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="date"
+        android:id="@+id/listDateTxtView"
+        android:layout_below="@+id/listDescTxtView"
+        android:layout_alignStart="@+id/listDescTxtView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="temp"
+        android:id="@+id/listTempTxtView"
+        android:layout_toEndOf="@+id/listDescTxtView"
+        android:layout_marginStart="55dp"
+        android:layout_alignTop="@+id/listDescTxtView"
+        android:layout_above="@+id/listDateTxtView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="time"
+        android:id="@+id/listTimeTxtView"
+        android:layout_alignTop="@+id/listDateTxtView"
+        android:layout_alignStart="@+id/listTempTxtView" />
+</RelativeLayout>
