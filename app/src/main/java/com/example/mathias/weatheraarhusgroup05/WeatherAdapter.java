@@ -53,13 +53,13 @@ public class WeatherAdapter extends BaseAdapter {
             weatherDesc.setText(w.getDescription());
 
             TextView weatherTemp = (TextView) convertView.findViewById(R.id.listTempTxtView);
-            weatherTemp.setText(w.getTemp());
+            weatherTemp.setText(String.valueOf(w.getTemp()));
 
             TextView weatherDate = (TextView) convertView.findViewById(R.id.listDateTxtView);
             weatherDate.setText(w.getTimestamp().toString().substring(0, 10));
 
             TextView weatherTime = (TextView) convertView.findViewById(R.id.listTimeTxtView);
-            weatherTime.setText(w.getTimestamp().toString().substring(10, 18));
+            weatherTime.setText(w.getTimestamp().toString().substring(10, 16));
         }
 
         return convertView;

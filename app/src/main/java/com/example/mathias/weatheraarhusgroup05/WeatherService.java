@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,15 +24,15 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class WeatherService extends Service {
     private final IBinder binder = new WeatherBinder();
-    private WeatherInfo current;
     private URL url;
     private int temperature;
     private String wDesc;
-    private ConnectivityManager conMan;
-    private NetworkInfo networkInfo;
+    private DatabaseHelper dbHelper;
 
     public WeatherService() {
     }
@@ -52,6 +53,7 @@ public class WeatherService extends Service {
     public void onCreate() {
         Log.d("create","Weather service created");
         super.onCreate();
+        dbHelper = new DatabaseHelper(this);
     }
 
     @Override
@@ -60,21 +62,29 @@ public class WeatherService extends Service {
         super.onDestroy();
     }
 
-    public WeatherInfo getCurrentWeather() {
+    public WeatherInfo getCurrentWeather() throws ExecutionException, InterruptedException {
         AsyncTask task = new AsyncTask() {
 
             @Override
-            protected Object doInBackground(Object[] params) {
-
+            protected Object doInBackground(Object[] params){
                 return sendRequest();
+            }
+
+            @Override
+            protected void onPostExecute(Object o) {
+                super.onPostExecute(o);
+                dbHelper.addWeatherInfo((WeatherInfo) o);
+
+
             }
         };
         task.execute();
-        return current;
+
+        return (WeatherInfo) task.get();
 
     }
 
-    private String sendRequest() {
+    private WeatherInfo sendRequest() {
         InputStream is = null;
         try {
             url = new URL("http://api.openweathermap.org/data/2.5/weather?id=2624652&APPID=60625d82b841767379c3699f40e44971");
@@ -90,8 +100,7 @@ public class WeatherService extends Service {
 
             String contentAsString = readIt(is, 500);
             Log.d("parse", "parsing in main");
-            parseIt(contentAsString);
-            return contentAsString;
+            return parseIt(contentAsString);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -99,17 +108,17 @@ public class WeatherService extends Service {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return "lol";
+        return null;
     }
 
-    private void parseIt(String s) throws JSONException {
+    private WeatherInfo parseIt(String s) throws JSONException {
 
         JSONObject obj = new JSONObject(s);
         temperature = obj.getJSONObject("main").getInt("temp");
         JSONArray w = obj.getJSONArray("weather");
         wDesc = ((JSONObject) w.get(0)).getString("description");
         Log.d("desc", "stuffing: " + temperature + wDesc);
-        current = new WeatherInfo(wDesc, temperature);
+        return new WeatherInfo(wDesc, temperature);
 
     }
 
@@ -119,5 +128,9 @@ public class WeatherService extends Service {
         char[] buffer = new char[len];
         reader.read(buffer);
         return new String(buffer);
+    }
+
+    public List<WeatherInfo> getPastWeather() {
+        return dbHelper.getAllWeatherInfo();
     }
 }
