@@ -49,4 +49,13 @@
         android:layout_below="@+id/pastTxtView"
         android:layout_alignParentStart="true" />
 
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Get current "
+        android:id="@+id/getCurrentButton"
+        android:layout_alignBottom="@+id/listView"
+        android:layout_alignParentEnd="true" />
+
 </RelativeLayout>
