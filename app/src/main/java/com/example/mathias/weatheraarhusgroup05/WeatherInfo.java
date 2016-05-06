@@ -19,11 +19,9 @@ public class WeatherInfo {
         this.timestamp = timestamp;
     }
 
-
-    public WeatherInfo(String description, int temp, Timestamp timestamp) {
+    public WeatherInfo(String description, int temp) {
         this.description = description;
         this.temp = temp;
-        this.timestamp = timestamp;
     }
 
     public int getId() {
