@@ -27,7 +27,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.lang.Thread;
 import java.util.concurrent.ExecutionException;
+
+import static java.lang.Thread.currentThread;
 
 public class WeatherService extends Service {
     public static final String BROADCAST_WEATHER_CHANGE = "change";
@@ -73,12 +76,13 @@ public class WeatherService extends Service {
         AsyncTask task = new AsyncTask() {
             @Override
             protected Object doInBackground(Object[] params) {
-                try {
+/*                try {
                     Log.d("thread", "Thread is waiting 1 min");
                     Thread.sleep(60000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }
+                }*/
+
                 Log.d("update", "Getting Weather update");
                 return sendRequest();
             }
@@ -88,9 +92,16 @@ public class WeatherService extends Service {
                 super.onPostExecute(o);
                 dbHelper.addWeatherInfo((WeatherInfo) o);
                 broadcastWeatherUpdate();
-                if(started) {
-                    backgroundWeatherUpdate();
-                }
+                new android.os.Handler().postDelayed(
+                        new Runnable() {
+                            public void run() {
+                                Log.i("tag","Next update in 30 seconds");
+                                if(started) {
+                                    backgroundWeatherUpdate();
+                                }
+                            }
+                        }, 30000);
+
             }
         };
         task.execute();
@@ -105,6 +116,7 @@ public class WeatherService extends Service {
     }
     @Override
     public void onDestroy() {
+        started = false;
         Log.d("dest","Weather service destroyed");
         super.onDestroy();
     }
@@ -114,7 +126,6 @@ public class WeatherService extends Service {
 
             @Override
             protected Object doInBackground(Object[] params){
-
                 return sendRequest();
             }
 

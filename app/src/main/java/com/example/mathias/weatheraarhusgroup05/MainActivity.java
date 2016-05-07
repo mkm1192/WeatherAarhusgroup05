@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Log.d("error", "service is null");
                 }
+                setupListView();
             }
         });
         Log.d("reg", "registering receivers");
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         unbindService(weatherConnection);
         if(wService != null) {
-            stopService(new Intent(this, WeatherService.class));
+            //stopService(new Intent(this, WeatherService.class));
         }
         super.onDestroy();
     }
