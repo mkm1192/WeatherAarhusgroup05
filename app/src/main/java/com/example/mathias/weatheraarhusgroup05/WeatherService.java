@@ -8,6 +8,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.ListView;
 
@@ -23,16 +24,19 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class WeatherService extends Service {
+    public static final String BROADCAST_WEATHER_CHANGE = "change";
     private final IBinder binder = new WeatherBinder();
     private URL url;
     private int temperature;
     private String wDesc;
     private DatabaseHelper dbHelper;
+    private boolean started = false;
 
     public WeatherService() {
     }
@@ -57,6 +61,49 @@ public class WeatherService extends Service {
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        started = true;
+        if(intent != null) {
+            backgroundWeatherUpdate();
+        }
+        return START_STICKY;
+    }
+
+    private void backgroundWeatherUpdate() {
+        AsyncTask task = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] params) {
+                try {
+                    Log.d("thread", "Thread is waiting 1 min");
+                    Thread.sleep(60000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Log.d("update", "Getting Weather update");
+                return sendRequest();
+            }
+
+            @Override
+            protected void onPostExecute(Object o) {
+                super.onPostExecute(o);
+                dbHelper.addWeatherInfo((WeatherInfo) o);
+                broadcastWeatherUpdate();
+                if(started) {
+                    backgroundWeatherUpdate();
+                }
+            }
+        };
+        task.execute();
+    }
+
+
+    private void broadcastWeatherUpdate(){
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(BROADCAST_WEATHER_CHANGE);
+        Log.d("broad", "Broadcasting:");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
+    }
+    @Override
     public void onDestroy() {
         Log.d("dest","Weather service destroyed");
         super.onDestroy();
@@ -67,6 +114,7 @@ public class WeatherService extends Service {
 
             @Override
             protected Object doInBackground(Object[] params){
+
                 return sendRequest();
             }
 
@@ -99,7 +147,7 @@ public class WeatherService extends Service {
             is = conn.getInputStream();
 
             String contentAsString = readIt(is, 500);
-            Log.d("parse", "parsing in main");
+            Log.d("parse", "parsing weather data");
             return parseIt(contentAsString);
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -115,11 +163,11 @@ public class WeatherService extends Service {
 
         JSONObject obj = new JSONObject(s);
         temperature = obj.getJSONObject("main").getInt("temp");
+        temperature -= 272;
         JSONArray w = obj.getJSONArray("weather");
         wDesc = ((JSONObject) w.get(0)).getString("description");
-        Log.d("desc", "stuffing: " + temperature + wDesc);
+        Log.d("desc", "weather data parsed, temp: " + temperature + " Description: " + wDesc);
         return new WeatherInfo(wDesc, temperature);
-
     }
 
     public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {

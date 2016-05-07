@@ -1,16 +1,20 @@
 package com.example.mathias.weatheraarhusgroup05;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -21,12 +25,15 @@ public class MainActivity extends AppCompatActivity {
     private WeatherService wService;
     private Button update;
     private WeatherInfo current;
+    private TextView desc, temp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         update = (Button) findViewById(R.id.getCurrentButton);
+        desc = (TextView) findViewById(R.id.descTxtView);
+        temp = (TextView) findViewById(R.id.tempTxtView);
 
         setupAndBindWeatherService();
 
@@ -34,7 +41,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(wService != null) {
+
                     try {
+                        Log.d("get", "Getting current weather");
                         current = wService.getCurrentWeather();
                     } catch (ExecutionException e) {
                         e.printStackTrace();
@@ -49,11 +58,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        Log.d("reg", "registering receivers");
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(WeatherService.BROADCAST_WEATHER_CHANGE);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(onWeatherServiceBroadcast, filter);
 
     }
 
     @Override
     protected void onDestroy() {
+        unbindService(weatherConnection);
         if(wService != null) {
             stopService(new Intent(this, WeatherService.class));
         }
@@ -76,17 +92,35 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         Intent weatherIntent = new Intent(MainActivity.this, WeatherService.class);
-        bindService(weatherIntent, weatherConnection, Context.BIND_AUTO_CREATE);
         startService(weatherIntent);
+        bindService(weatherIntent, weatherConnection, Context.BIND_AUTO_CREATE);
+
     }
    private void setupListView() {
-       ArrayList<WeatherInfo> testList = new ArrayList<WeatherInfo>();
-       for (int i = 0; i < 10; i++) {
-           testList.add(i, new WeatherInfo(i, "Cloudy", (i + 10), new Timestamp(System.currentTimeMillis())));
+       ArrayList<WeatherInfo> WeatherList = new ArrayList<WeatherInfo>();
+       WeatherList = (ArrayList<WeatherInfo>) wService.getPastWeather();
+       if (WeatherList != null) {
+           current = WeatherList.get(0);
+           WeatherList.remove(0);
+           desc.setText(current.getDescription());
+           temp.setText(String.valueOf(current.getTemp()) + "°");
+       } else {
+           Log.d("list", "list is null");
        }
-       WeatherAdapter adapter = new WeatherAdapter(this, (ArrayList<WeatherInfo>) wService.getPastWeather());
+       WeatherAdapter adapter = new WeatherAdapter(this, WeatherList);
        ListView listview = (ListView) findViewById(R.id.listView);
        listview.setAdapter(adapter);
 
    }
+
+    private BroadcastReceiver onWeatherServiceBroadcast = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("broad", "Broadcast reveiced from weather service: " + intent.getAction().toString());
+            String action = intent.getAction().toString();
+            if(action == "change") {
+                setupListView();
+            }
+        }
+    };
 }

@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:text="Get current "
         android:id="@+id/getCurrentButton"
-        android:layout_alignBottom="@+id/listView"
-        android:layout_alignParentEnd="true" />
+        android:layout_above="@+id/listView"
+        android:layout_alignEnd="@+id/listView" />
 
 </RelativeLayout>

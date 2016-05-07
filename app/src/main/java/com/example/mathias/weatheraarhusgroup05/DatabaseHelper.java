@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -80,6 +81,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             WeatherInfo w = new WeatherInfo(id, desc, temp, Timestamp.valueOf(timestamp));
             res.add(w);
         }
+        Collections.sort(res);
+        Collections.reverse(res);
         return res;
     }
 }
