@@ -12,23 +12,26 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Current:"
+        android:text="@string/current"
         android:id="@+id/currentTxtView"
+        style="@style/TextHeaders"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Description"
+        android:text="@string/description"
         android:id="@+id/descTxtView"
+        style="@style/TextHeaders"
         android:layout_below="@+id/currentTxtView"
         android:layout_centerHorizontal="true" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Temperature"
+        android:text="@string/temp"
+        style="@style/TextHeaders"
         android:id="@+id/tempTxtView"
         android:layout_below="@+id/descTxtView"
         android:layout_centerHorizontal="true" />
@@ -36,7 +39,8 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Past 24 hours:"
+        android:text="@string/past"
+        style="@style/TextHeaders"
         android:id="@+id/pastTxtView"
         android:layout_marginTop="56dp"
         android:layout_below="@+id/tempTxtView"
@@ -53,7 +57,7 @@
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Get current "
+        android:text="@string/currentBtn"
         android:id="@+id/getCurrentButton"
         android:layout_above="@+id/listView"
         android:layout_alignEnd="@+id/listView" />

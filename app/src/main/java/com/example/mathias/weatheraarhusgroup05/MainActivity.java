@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
        } else {
            Log.d("list", "list is null");
        }
+
        WeatherAdapter adapter = new WeatherAdapter(this, WeatherList);
        ListView listview = (ListView) findViewById(R.id.listView);
        listview.setAdapter(adapter);

@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Weather Aarhus group 05</string>
+    <string name="current">Current:</string>
+    <string name="description">Description:</string>
+    <string name="temp">Temperature:</string>
+    <string name="past">Past 24 hours:</string>
+    <string name="currentBtn">Get Current</string>
 </resources>

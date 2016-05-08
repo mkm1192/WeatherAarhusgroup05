@@ -174,7 +174,7 @@ public class WeatherService extends Service {
 
         JSONObject obj = new JSONObject(s);
         temperature = obj.getJSONObject("main").getInt("temp");
-        temperature -= 272;
+        temperature -= 273;
         JSONArray w = obj.getJSONArray("weather");
         wDesc = ((JSONObject) w.get(0)).getString("description");
         Log.d("desc", "weather data parsed, temp: " + temperature + " Description: " + wDesc);
