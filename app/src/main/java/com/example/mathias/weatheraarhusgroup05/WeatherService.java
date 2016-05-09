@@ -84,23 +84,24 @@ public class WeatherService extends Service {
                 }*/
 
                 Log.d("update", "Getting Weather update");
-                return sendRequest();
+                sendRequest();
+                return null;
             }
 
             @Override
             protected void onPostExecute(Object o) {
                 super.onPostExecute(o);
-                dbHelper.addWeatherInfo((WeatherInfo) o);
+
                 broadcastWeatherUpdate();
                 new android.os.Handler().postDelayed(
                         new Runnable() {
                             public void run() {
-                                Log.i("tag","Next update in 30 seconds");
+                                Log.i("tag","Next update in 30 min");
                                 if(started) {
                                     backgroundWeatherUpdate();
                                 }
                             }
-                        }, 300000);
+                        }, 1800000);
 
             }
         };
@@ -121,29 +122,23 @@ public class WeatherService extends Service {
         super.onDestroy();
     }
 
-    public WeatherInfo getCurrentWeather() throws ExecutionException, InterruptedException {
+    public void getCurrentWeather() throws ExecutionException, InterruptedException {
         AsyncTask task = new AsyncTask() {
 
             @Override
             protected Object doInBackground(Object[] params){
-                return sendRequest();
+                sendRequest();
+                return null;
             }
 
-            @Override
-            protected void onPostExecute(Object o) {
-                super.onPostExecute(o);
-                dbHelper.addWeatherInfo((WeatherInfo) o);
 
-
-            }
         };
         task.execute();
 
-        return (WeatherInfo) task.get();
 
     }
 
-    private WeatherInfo sendRequest() {
+    private void sendRequest() {
         InputStream is = null;
         try {
             url = new URL("http://api.openweathermap.org/data/2.5/weather?id=2624652&APPID=60625d82b841767379c3699f40e44971");
@@ -159,7 +154,8 @@ public class WeatherService extends Service {
 
             String contentAsString = readIt(is, 500);
             Log.d("parse", "parsing weather data");
-            return parseIt(contentAsString);
+            dbHelper.addWeatherInfo(parseIt(contentAsString));
+            broadcastWeatherUpdate();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -167,7 +163,7 @@ public class WeatherService extends Service {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return null;
+
     }
 
     private WeatherInfo parseIt(String s) throws JSONException {
@@ -189,7 +185,16 @@ public class WeatherService extends Service {
         return new String(buffer);
     }
 
-    public List<WeatherInfo> getPastWeather() {
-        return dbHelper.getAllWeatherInfo();
+    public List<WeatherInfo> getPastWeather() throws ExecutionException, InterruptedException {
+        AsyncTask task = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] params) {
+
+                return dbHelper.getAllWeatherInfo();
+
+            }
+        };
+        task.execute();
+        return (List<WeatherInfo>) task.get();
     }
 }

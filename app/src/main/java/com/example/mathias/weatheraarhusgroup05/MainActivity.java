@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
                     try {
                         Log.d("get", "Getting current weather");
-                        current = wService.getCurrentWeather();
+                        wService.getCurrentWeather();
                     } catch (ExecutionException e) {
                         e.printStackTrace();
                     } catch (InterruptedException e) {
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Log.d("error", "service is null");
                 }
-                setupListView();
+
             }
         });
         Log.d("reg", "registering receivers");
@@ -71,9 +71,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         unbindService(weatherConnection);
-        if(wService != null) {
-            stopService(new Intent(this, WeatherService.class));
-        }
         super.onDestroy();
     }
 
@@ -82,7 +79,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 wService = ((WeatherService.WeatherBinder)service).getWeatherService();
-                setupListView();
+                try {
+                    setupListView();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 Log.d("conn", "Weather service connected");
             }
 
@@ -97,10 +100,10 @@ public class MainActivity extends AppCompatActivity {
         bindService(weatherIntent, weatherConnection, Context.BIND_AUTO_CREATE);
 
     }
-   private void setupListView() {
-       ArrayList<WeatherInfo> WeatherList = new ArrayList<WeatherInfo>();
+   private void setupListView() throws ExecutionException, InterruptedException {
+       ArrayList<WeatherInfo> WeatherList;
        WeatherList = (ArrayList<WeatherInfo>) wService.getPastWeather();
-       if (WeatherList != null) {
+       if (WeatherList.size() > 0) {
            current = WeatherList.get(0);
            WeatherList.remove(0);
            desc.setText(current.getDescription());
@@ -121,7 +124,13 @@ public class MainActivity extends AppCompatActivity {
             Log.d("broad", "Broadcast reveiced from weather service: " + intent.getAction().toString());
             String action = intent.getAction().toString();
             if(action == "change") {
-                setupListView();
+                try {
+                    setupListView();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     };

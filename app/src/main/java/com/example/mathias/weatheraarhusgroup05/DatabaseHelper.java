@@ -15,7 +15,7 @@ import java.util.List;
  * Created by Mathias on 06-05-2016.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "MyDatabase.db";
 
     private static final String TABLE_NAME = "tasks";
@@ -31,7 +31,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
                     COLUMN_NAME_DESC + TEXT_TYPE + "," +
                     COLUMN_NAME_TEMP + " INTEGER NOT NULL," +
-                    COLUMN_NAME_TIMESTAMP + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
+                    COLUMN_NAME_TIMESTAMP + " DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')))";
 
 
 
@@ -60,6 +60,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public List<WeatherInfo> getAllWeatherInfo() {
         SQLiteDatabase db = getReadableDatabase();
+
+        String deleteOldEntries = "DELETE FROM " + TABLE_NAME + " WHERE " + COLUMN_NAME_TIMESTAMP + " < datetime('now', '-1 day')";
+
+        db.rawQuery(deleteOldEntries, null);
 
         ArrayList<WeatherInfo> res = new ArrayList<WeatherInfo>();
         String selectTask = "SELECT " + COLUMN_NAME_ID  + ", " +
