@@ -100,7 +100,7 @@ public class WeatherService extends Service {
                                     backgroundWeatherUpdate();
                                 }
                             }
-                        }, 30000);
+                        }, 300000);
 
             }
         };
