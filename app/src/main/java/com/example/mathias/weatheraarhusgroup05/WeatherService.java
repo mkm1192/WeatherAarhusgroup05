@@ -1,5 +1,6 @@
 package com.example.mathias.weatheraarhusgroup05;
 
+import android.app.AlarmManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.ListView;
@@ -40,6 +42,7 @@ public class WeatherService extends Service {
     private String wDesc;
     private DatabaseHelper dbHelper;
     private boolean started = false;
+    private PowerManager.WakeLock wl;
 
     public WeatherService() {
     }
@@ -59,6 +62,9 @@ public class WeatherService extends Service {
     @Override
     public void onCreate() {
         Log.d("create","Weather service created");
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DoNjfdhotDimScreen");
+        wl.acquire();
         super.onCreate();
         dbHelper = new DatabaseHelper(this);
     }
@@ -82,7 +88,6 @@ public class WeatherService extends Service {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }*/
-
                 Log.d("update", "Getting Weather update");
                 sendRequest();
                 return null;
@@ -91,18 +96,15 @@ public class WeatherService extends Service {
             @Override
             protected void onPostExecute(Object o) {
                 super.onPostExecute(o);
-
-                broadcastWeatherUpdate();
+                Log.i("tag","Next update in 30 min");
                 new android.os.Handler().postDelayed(
                         new Runnable() {
                             public void run() {
-                                Log.i("tag","Next update in 30 min");
                                 if(started) {
                                     backgroundWeatherUpdate();
                                 }
                             }
                         }, 1800000);
-
             }
         };
         task.execute();
@@ -112,12 +114,13 @@ public class WeatherService extends Service {
     private void broadcastWeatherUpdate(){
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(BROADCAST_WEATHER_CHANGE);
-        Log.d("broad", "Broadcasting:");
+        Log.d("service", "Broadcasting:");
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
     }
     @Override
     public void onDestroy() {
         started = false;
+        wl.release();
         Log.d("dest","Weather service destroyed");
         super.onDestroy();
     }

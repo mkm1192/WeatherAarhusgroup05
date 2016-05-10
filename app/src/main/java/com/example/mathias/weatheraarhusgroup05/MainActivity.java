@@ -1,5 +1,6 @@
 package com.example.mathias.weatheraarhusgroup05;
 
+import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -70,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        unbindService(weatherConnection);
+        //unbindService(weatherConnection);
         super.onDestroy();
     }
 
@@ -98,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
         Intent weatherIntent = new Intent(MainActivity.this, WeatherService.class);
         startService(weatherIntent);
         bindService(weatherIntent, weatherConnection, Context.BIND_AUTO_CREATE);
-
     }
    private void setupListView() throws ExecutionException, InterruptedException {
        ArrayList<WeatherInfo> WeatherList;
